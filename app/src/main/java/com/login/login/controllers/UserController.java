@@ -5,15 +5,13 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.login.login.entities.User;
 import com.login.login.services.UserService;
@@ -21,11 +19,8 @@ import com.login.login.utils.JWTUtil;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import jakarta.websocket.server.PathParam;
 
-@Controller
+@RestController
 public class UserController {
 
     @Autowired
@@ -55,8 +50,12 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
     
-    @GetMapping(value = "/get")
-    public ResponseEntity<?> get(){
+    @GetMapping(value = "/list")
+    public ResponseEntity<?> list(@RequestHeader(value = "Authorization") String token){
+        Boolean authorization = JWTUtil.validateToken(token);
+        if(!authorization){
+            return new ResponseEntity<>(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
+        }
         return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 }
